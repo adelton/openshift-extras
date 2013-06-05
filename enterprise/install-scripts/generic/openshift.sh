@@ -2229,6 +2229,28 @@ broker && configure_access_keys_on_broker
 #broker && configure_mongo_auth_plugin
 broker && configure_messaging_plugin
 broker && configure_dns_plugin
+
+echo <<EOF > /tmp/openshift-origin-auth-remote-user-kerberos.conf.sample.patch
+diff --git a/openshift-console/httpd/conf.d/openshift-origin-auth-remote-user-kerberos.conf.sample b/openshift-console/httpd/conf.d/openshift-origin-auth-remote-user-kerberos.conf.sample
+index a56eac7..bec8400 100755
+--- a/openshift-console/httpd/conf.d/openshift-origin-auth-remote-user-kerberos.conf.sample
++++ b/openshift-console/httpd/conf.d/openshift-origin-auth-remote-user-kerberos.conf.sample
+@@ -13,6 +13,10 @@ RequestHeader set X-Remote-User "%{RU}e" env=RU
+     AuthType Kerberos
+     KrbMethodNegotiate On
+     KrbMethodK5Passwd On
++    # The KrbLocalUserMapping enables conversion to local users, using
++    # auth_to_local rules in /etc/krb5.conf. By default it strips the
++    # @REALM part. See krb5.conf(5) for details how to set up specific rules.
++    KrbLocalUserMapping On
+     KrbServiceName HTTP/www.example.com
+     KrbAuthRealms EXAMPLE.COM
+     Krb5KeyTab /var/www/openshift/broker/httpd/conf.d/http.keytab
+EOF
+
+patch /var/www/openshift/broker/httpd/conf.d/openshift-origin-auth-remote-user-kerberos.conf.sample < /tmp/openshift-origin-auth-remote-user-kerberos.conf.sample.patch
+patch /var/www/openshift/console/httpd/conf.d/openshift-origin-auth-remote-user-kerberos.conf.sample < /tmp/openshift-origin-auth-remote-user-kerberos.conf.sample.patch
+
 broker && configure_httpd_auth
 broker && configure_broker_ssl_cert
 
